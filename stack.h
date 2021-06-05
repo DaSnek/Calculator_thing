@@ -26,15 +26,24 @@ public:
 		return t;
 	}
 
-	bool empty() {
+	//for debugging uses
+	void dump_data() {
+		for (const T& d : vec) {
+			std::cout << d << std::endl;
+		}
+		std::cout << std::endl;
+	}
+
+
+	bool is_empty() const {
 		return vec.size() == 0;
 	}
 
-	int size() {
+	int size() const {
 		return vec.size();
 	}
 
-	T const& peek() {
+	T const& peek() const {
 		return vec.back();
 	}
 };

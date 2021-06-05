@@ -11,6 +11,8 @@
 
 using std::string;
 
+int debug = 0;
+
 class ExpresParser {
 public:
 	Stack<Token> operator_s;
@@ -39,8 +41,11 @@ public:
 	//	case TOKENTYPE_SQRT:
 			return 40;
 
-		case TOKENTYPE_LP:
+		case TOKENTYPE_NEG:
 			return 50;
+
+		case TOKENTYPE_LP:
+			return 60;
 		
 		default:
 			assert(0);
@@ -55,12 +60,23 @@ public:
 
 void top_calculate(ExpresParser& ep) {
 	double result;
+
 	if (ep.value_s.size() < 2) {
-		std::cout << "Error: missing value, stack size " << ep.value_s.size() << std::endl;
-		exit(-1);
+		if (ep.operator_s.peek().type != TOKENTYPE_NEG) {
+			std::cout << "Error: missing value, stack size " << ep.value_s.size() << std::endl;
+			exit(-1);
+		}
 	}
 
 	Token op = ep.operator_s.pop();
+	
+	if (op.type == TOKENTYPE_NEG) {
+		Token v = ep.value_s.pop();
+		v.set_number(0, v.value_d * -1);
+		ep.value_s.push(v);	
+		return;
+	}
+
 	Token v1 = ep.value_s.pop();
 	Token v2 = ep.value_s.pop();
 
@@ -104,6 +120,16 @@ void print_result(ExpresParser& ep) {
 }
 
 void process(ExpresParser& ep, Token const& t) {
+	
+	if (debug) {
+		std::cout << "--------values-------------" << std::endl;
+		ep.value_s.dump_data();
+		std::cout << "----------op---------------" << std::endl;
+		ep.operator_s.dump_data();
+		std::cout << "----------------------------" << std::endl;
+		std::cout << std::endl << std::endl;
+	}
+
 	if (t.type == TOKENTYPE_NUM) {
 		ep.value_s.push(t);
 		return;
@@ -111,7 +137,7 @@ void process(ExpresParser& ep, Token const& t) {
 	
 	while (1) {
 		if (t.type == TOKENTYPE_RP) {
-			if (ep.operator_s.empty()) {
+			if (ep.operator_s.is_empty()) {
 				printf("Error: no match for ')'\n");
 				exit(-1);
 			}
@@ -127,7 +153,7 @@ void process(ExpresParser& ep, Token const& t) {
 			continue;
 		}	
 	
-		if (ep.operator_s.empty()) {
+		if (ep.operator_s.is_empty()) {
 			if (t.type == TOKENTYPE_EL) {
 				print_result(ep);
 				return;
@@ -151,10 +177,8 @@ void process(ExpresParser& ep, Token const& t) {
 	}	
 }
 
-int debug = 0;
-
 int main(int ac, char*av[]) {
-	string line;
+	std::string line;
 	ExpresParser ep;
 
 	for (int i = 1; i < ac; i++) {

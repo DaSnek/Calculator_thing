@@ -11,6 +11,7 @@ enum {
 	TOKENTYPE_MUL,
 	TOKENTYPE_DIV,
 	TOKENTYPE_POW,
+	TOKENTYPE_NEG,
 	TOKENTYPE_EL,
 	TOKENTYPE_RP,
 	TOKENTYPE_LP
@@ -50,6 +51,12 @@ struct Token {
 		offset = off;
 	}
 
+	void set_neg(int off) {
+		type = TOKENTYPE_NEG;
+		value_s = "(0-1)";
+		offset = off;
+	}
+
 	void set_mul(int off) {
 		type = TOKENTYPE_MUL;
 		value_s = "*";
@@ -85,10 +92,11 @@ struct Token {
 		value_s = ")";
 		offset = off;
 	}
-
-	~Token() {}
 	
+	~Token() {}
 };
+
+std::ostream& operator << (std::ostream& os, const Token& t);
 
 class TokenParser {
 	std::string src;
@@ -98,7 +106,9 @@ public:
 	explicit TokenParser(const std::string& line);
 	Token get_token();
 	virtual ~TokenParser();
-	void print_error(const std::string& msg);
+	void print_error(const std::string& msg) const;
+
+	Token prev_token;
 };
 
 #endif

@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 #include "token.h"
 
 using std::string;
+
+extern int debug;
 
 static bool is_digit(char c) {
 	return c <= '9' && c >= '0';
@@ -13,7 +16,7 @@ static bool is_digit(char c) {
 string Token::to_string() const {
 	std::stringstream ss;
 
-	switch(type) {
+	switch (type) {
 	case TOKENTYPE_EL:
 		ss << "<EOL>";
 		break;
@@ -28,6 +31,10 @@ string Token::to_string() const {
 
 	case TOKENTYPE_PLUS:
 		ss << "<+>";
+		break;
+
+	case TOKENTYPE_NEG:
+		ss << "<(0-1)>";
 		break;
 
 	case TOKENTYPE_MINUS:
@@ -46,6 +53,10 @@ string Token::to_string() const {
 		ss << "<^>";
 		break;
 
+	case TOKENTYPE_NONE:
+		ss << "<NONE>";
+		break;
+
 	case TOKENTYPE_NUM:
 		ss << "<NUMBER: " << value_d << ">";
 		break;
@@ -57,9 +68,14 @@ string Token::to_string() const {
 	return ss.str();
 }
 
-TokenParser::TokenParser(const std::string& line) : src(line), cur_offset(0) {}
+std::ostream& operator << (std::ostream& os, const Token& t) {
+	os << t.to_string() << ' ';
+	return os;
+}
 
-void TokenParser::print_error(const string& msg) {
+TokenParser::TokenParser(const std::string& line) : src(line), cur_offset(0), prev_token() {}
+
+void TokenParser::print_error(const string& msg) const {
 	printf("Error: %s\n", msg.c_str());
 	printf("%s\n", src.c_str());
 	for (int i = 0; i < cur_offset; i++) {
@@ -75,8 +91,12 @@ static bool is_space(char c) {
 Token TokenParser::get_token() {
 	Token token;
 
+	if (debug) 
+		std::cout << "prev_t type: " << prev_token.to_string() << std::endl;
+
 	if (cur_offset >= src.size()) {
 		token.set_el();
+		prev_token = token;
 		return token;
 	}
 
@@ -86,42 +106,57 @@ Token TokenParser::get_token() {
 	if (src[cur_offset] ==  '+')  {
 		token.set_plus(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}	
 	
 	if (src[cur_offset] ==  '-')  {
-		token.set_minus(cur_offset);
-		cur_offset++;
-		return token;
+		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP) {
+			token.set_minus(cur_offset);
+			cur_offset++;					//reminder: if the token in front of it is a number or a rp 
+			prev_token = token;				//then its a operator -, otherwise its a negative sign				
+			return token;					
+		} else {
+			token.set_neg(cur_offset);
+			cur_offset++;
+			prev_token = token;
+			
+			return token;
+		}
 	}	
 	
 	if (src[cur_offset] ==  '*')  {
 		token.set_mul(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}	
 	
 	if (src[cur_offset] ==  '/')  {
 		token.set_div(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}	
 
 	if (src[cur_offset] == '(') {
 		token.set_lp(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}
 
 	if (src[cur_offset] == ')') {
 		token.set_rp(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}
 
 	if (src[cur_offset] == '^') {
 		token.set_pow(cur_offset);
 		cur_offset++;
+		prev_token = token;
 		return token;
 	}
 
@@ -143,6 +178,7 @@ Token TokenParser::get_token() {
 
 		token.set_number(cur_offset, d);
 		cur_offset = end;
+		prev_token = token;
 		
 		return token;
 	}
