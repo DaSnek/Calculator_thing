@@ -64,7 +64,7 @@ void top_calculate(ExpresParser& ep) {
 	if (ep.value_s.size() < 2) {
 		if (ep.operator_s.peek().type != TOKENTYPE_NEG) {
 			std::cout << "Error: missing value, stack size " << ep.value_s.size() << std::endl;
-			exit(-1);
+			throw string("");
 		}
 	}
 
@@ -96,7 +96,7 @@ void top_calculate(ExpresParser& ep) {
 	case TOKENTYPE_DIV:
 		if (v1.value_d == 0) {
 			std::cout << "Error: divide by 0 error" << std::endl;
-			exit(-1);
+			throw string("");
 		}
 		result = v2.value_d / v1.value_d;
 		break;
@@ -114,7 +114,7 @@ void top_calculate(ExpresParser& ep) {
 void print_result(ExpresParser& ep) {
 	if (ep.value_s.size() != 1) {
 		std::cout << "Error: missing operator(s)" << std::endl;
-		exit(1);
+		throw string("");
 	}
 	std::cout << ep.value_s.pop().value_d << std::endl;
 }
@@ -139,7 +139,7 @@ void process(ExpresParser& ep, Token const& t) {
 		if (t.type == TOKENTYPE_RP) {
 			if (ep.operator_s.is_empty()) {
 				printf("Error: no match for ')'\n");
-				exit(-1);
+				throw string();
 			}
 
 			Token top = ep.operator_s.peek();
@@ -179,33 +179,36 @@ void process(ExpresParser& ep, Token const& t) {
 
 int main(int ac, char*av[]) {
 	std::string line;
-	ExpresParser ep;
 
 	for (int i = 1; i < ac; i++) {
 		if (strcmp(av[i], "-d") == 0) {
 			debug = 1;
 		}
 	}
-
 	while (1) {
-		printf("> ");
-		std::getline(std::cin, line);
-	//	printf("[%s]\n", line.c_str());
-		if (line == "quit"|| line == "q"|| line == "exit")
-			exit(0);
-		if (line == "") {
-			continue;
-		}	
-		
-		TokenParser tp(line);
-		Token t;
-
-		do {
-			t = tp.get_token();
-			if (debug) 
-				printf("%s\n",t.to_string().c_str());
+		try {
+			ExpresParser ep;
+			printf("> ");
+			std::getline(std::cin, line);
+		//	printf("[%s]\n", line.c_str());
+			if (line == "quit"|| line == "q"|| line == "exit")
+				exit(0);
+			if (line == "") {
+				continue;
+			}	
 			
-			process(ep, t);
-		} while (!t.is_el());
+			TokenParser tp(line);
+			Token t;
+
+			do {
+				t = tp.get_token();
+				if (debug) 
+					printf("%s\n",t.to_string().c_str());
+				
+				process(ep, t);
+			} while (!t.is_el());
+		} catch (std::string s) {
+			continue;
+		}
 	}
 }
