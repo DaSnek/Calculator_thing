@@ -181,8 +181,9 @@ void process(ExpresParser& ep, Token const& t) {
 void print_usage(bool init) {
 	if (init) {
 		printf("\n");
-		printf("CLC (Command Line Calculator) Version 21.2.1\n");
+		printf("CLC (Command Line Calculator) Version 21.2.2\n\n");
 	}
+	printf("Use '$' for the previous result. (Ex: 402 + $ ^ 2)\n");
 	printf("Use 'quit, 'q', or 'exit' to quit.\n");
 	printf("Type 'help' to see this message again.\n");
 	return;
@@ -205,10 +206,14 @@ int main(int ac, char*av[]) {
 			printf("> ");
 			std::getline(std::cin, line);
 
-			if (line == "quit"|| line == "q"|| line == "exit")
-				exit(0);
 			if (line == "") 
 				continue;
+
+			if (line == "quit"|| line == "q"|| line == "exit") {
+				printf("(exited)\n\n");				
+				exit(0);
+			}
+
 			if (line == "help") {
 				print_usage(false);
 				continue;
