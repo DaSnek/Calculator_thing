@@ -7,10 +7,14 @@
 
 using std::string;
 
-extern int debug;
+extern bool debug;
 
 static bool is_digit(char c) {
 	return c <= '9' && c >= '0';
+}
+
+static bool is_letter(char c) {
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c >- 'z');
 }
 
 string Token::to_string() const {
@@ -182,6 +186,7 @@ Token TokenParser::get_token() {
 		
 		return token;
 	}
+
 	print_error("unknown token");
 	exit(1);
 }

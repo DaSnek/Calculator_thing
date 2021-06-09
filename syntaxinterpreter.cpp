@@ -11,7 +11,7 @@
 
 using std::string;
 
-int debug = 0;
+bool debug = 0;
 
 class ExpresParser {
 public:
@@ -38,7 +38,6 @@ public:
 			return 30;
 
 		case TOKENTYPE_POW:
-	//	case TOKENTYPE_SQRT:
 			return 40;
 
 		case TOKENTYPE_NEG:
@@ -120,7 +119,6 @@ void print_result(ExpresParser& ep) {
 }
 
 void process(ExpresParser& ep, Token const& t) {
-	
 	if (debug) {
 		std::cout << "--------values-------------" << std::endl;
 		ep.value_s.dump_data();
@@ -177,25 +175,43 @@ void process(ExpresParser& ep, Token const& t) {
 	}	
 }
 
+void print_usage(bool init) {
+	if (init) {
+		printf("\n");
+		printf("CLC (Command Line Calculator) Version 21.2.1\n");
+	}
+	printf("Use 'quit, 'q', or 'exit' to quit.\n");
+	printf("Type 'help' to see this message again.\n");
+	return;
+}
+
 int main(int ac, char*av[]) {
 	std::string line;
 
 	for (int i = 1; i < ac; i++) {
 		if (strcmp(av[i], "-d") == 0) {
-			debug = 1;
+			debug = true;
 		}
 	}
+	
+	print_usage(true);
+
 	while (1) {
 		try {
 			ExpresParser ep;
 			printf("> ");
 			std::getline(std::cin, line);
+
 		//	printf("[%s]\n", line.c_str());
+
 			if (line == "quit"|| line == "q"|| line == "exit")
 				exit(0);
-			if (line == "") {
+			if (line == "") 
 				continue;
-			}	
+			if (line == "help") {
+				print_usage(false);
+				continue;
+			}
 			
 			TokenParser tp(line);
 			Token t;
@@ -204,7 +220,6 @@ int main(int ac, char*av[]) {
 				t = tp.get_token();
 				if (debug) 
 					printf("%s\n",t.to_string().c_str());
-				
 				process(ep, t);
 			} while (!t.is_el());
 		} catch (std::string s) {
