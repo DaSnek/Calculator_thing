@@ -11,7 +11,8 @@
 
 using std::string;
 
-bool debug = 0;
+bool debug = false;
+double prev_result = 0;
 
 class ExpresParser {
 public:
@@ -114,8 +115,10 @@ void print_result(ExpresParser& ep) {
 	if (ep.value_s.size() != 1) {
 		std::cout << "Error: missing operator(s)" << std::endl;
 		throw string("");
-	}
-	std::cout << ep.value_s.pop().value_d << std::endl;
+	} 
+	double r = ep.value_s.pop().value_d;
+	std::cout << r << std::endl;
+	prev_result = r;
 }
 
 void process(ExpresParser& ep, Token const& t) {

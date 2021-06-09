@@ -8,6 +8,7 @@
 using std::string;
 
 extern bool debug;
+extern double prev_result;
 
 static bool is_digit(char c) {
 	return c <= '9' && c >= '0';
@@ -159,6 +160,13 @@ Token TokenParser::get_token() {
 
 	if (src[cur_offset] == '^') {
 		token.set_pow(cur_offset);
+		cur_offset++;
+		prev_token = token;
+		return token;
+	}
+
+	if (src[cur_offset] == '$') {
+		token.set_number(cur_offset, prev_result);
 		cur_offset++;
 		prev_token = token;
 		return token;
