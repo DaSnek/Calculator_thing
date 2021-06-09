@@ -205,8 +205,6 @@ int main(int ac, char*av[]) {
 			printf("> ");
 			std::getline(std::cin, line);
 
-		//	printf("[%s]\n", line.c_str());
-
 			if (line == "quit"|| line == "q"|| line == "exit")
 				exit(0);
 			if (line == "") 

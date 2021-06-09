@@ -118,7 +118,7 @@ Token TokenParser::get_token() {
 	if (src[cur_offset] ==  '-')  {
 		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP) {
 			token.set_minus(cur_offset);
-			cur_offset++;					//reminder: if the token in front of it is a number or a rp 
+			cur_offset++;					//if the token in front of it is a number or a rp 
 			prev_token = token;				//then its a operator -, otherwise its a negative sign				
 			return token;					
 		} else {
@@ -196,7 +196,7 @@ Token TokenParser::get_token() {
 	}
 
 	print_error("unknown token");
-	exit(1);
+	throw string();
 }
 
 TokenParser::~TokenParser() {}
