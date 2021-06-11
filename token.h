@@ -3,6 +3,7 @@
 
 #include <string>
 
+//all of the types of tokens we can have
 enum {
 	TOKENTYPE_NONE,
 	TOKENTYPE_NUM,
@@ -15,14 +16,13 @@ enum {
 	TOKENTYPE_EL,
 	TOKENTYPE_RP,
 	TOKENTYPE_LP,
-	//TOKENTYPE_LR,
 };
 
 struct Token {
-	int type;
-	std::string value_s;
-	double value_d;
-	int offset;
+	int type;				//the token's type
+	std::string value_s;	//each token one of two values, either a string value,
+	double value_d;			//or a number value
+	int offset;				//not nessary, for good for printing out errors
 
 	std::string to_string() const;
 	
@@ -32,6 +32,8 @@ struct Token {
 		
 	Token(Token const& t) = default;
 
+	//helpers to inicialize the tokens
+	//and sets the token types
 	void set_el() {
 		type = TOKENTYPE_EL;
 	}
@@ -76,7 +78,7 @@ struct Token {
 		offset = off;
 	}
 
-	void set_number(int off, double n){
+	void set_number(int off, double n) {
 		type = TOKENTYPE_NUM;
 		offset = off;
 		value_d = n;
@@ -97,6 +99,7 @@ struct Token {
 	~Token() {}
 };
 
+//printing the tokens, for debugging purposes
 std::ostream& operator << (std::ostream& os, const Token& t);
 
 class TokenParser {

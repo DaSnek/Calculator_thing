@@ -18,6 +18,7 @@ static bool is_letter(char c) {
 	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c >- 'z');
 }
 
+//aids in printing and debugging
 string Token::to_string() const {
 	std::stringstream ss;
 
@@ -93,21 +94,26 @@ static bool is_space(char c) {
 	return c == ' ' || c == '\t' || c == '\n';
 }
 
+//cuts the string input by the user into individual "tokens"
 Token TokenParser::get_token() {
 	Token token;
 
 	if (debug) 
 		std::cout << "prev_t type: " << prev_token.to_string() << std::endl;
 
+	//if the current position we are looking at is already the end, then we return an end of line token
+	// which ranks lower than everything else
 	if (cur_offset >= src.size()) {
 		token.set_el();
 		prev_token = token;
 		return token;
 	}
 
+	//skips over the spaces
 	while (cur_offset < src.size() && is_space(src[cur_offset])) 
 		cur_offset++;
 
+	//assigns types to values accordingly
 	if (src[cur_offset] ==  '+')  {
 		token.set_plus(cur_offset);
 		cur_offset++;
@@ -117,7 +123,7 @@ Token TokenParser::get_token() {
 	
 	if (src[cur_offset] ==  '-')  {
 		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP) {
-			token.set_minus(cur_offset);
+			token.set_minus(cur_offset);	//special case for the '-' operator.
 			cur_offset++;					//if the token in front of it is a number or a rp 
 			prev_token = token;				//then its a operator -, otherwise its a negative sign				
 			return token;					
@@ -165,6 +171,8 @@ Token TokenParser::get_token() {
 		return token;
 	}
 
+	// if we encounter a $ sign, then we set its type as a number and 
+	//assigns the previous result to it
 	if (src[cur_offset] == '$') {
 		token.set_number(cur_offset, prev_result);
 		cur_offset++;
@@ -172,9 +180,12 @@ Token TokenParser::get_token() {
 		return token;
 	}
 
+	//if we encounter a digit...
 	if (is_digit(src[cur_offset])) {
-		int end = cur_offset + 1;
+		int end = cur_offset + 1;			// the location of the last digit of the number
 	
+		//iterating through the input until either we get to the end 
+		//or encounter something that is not a digit
 		while (end < src.size() && (is_digit(src[end]) || src[end] == '.')) {
 			end++;
 		}
@@ -195,6 +206,7 @@ Token TokenParser::get_token() {
 		return token;
 	}
 
+	//if the token doesn't fit any of the cases, then its an error
 	print_error("unknown token");
 	throw string();
 }
