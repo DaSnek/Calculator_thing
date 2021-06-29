@@ -1,8 +1,6 @@
 #ifndef __STACK_H__
 #define __STACK_H__
 
-//this is a test eee
-
 #include <stdio.h>
 #include <iostream>
 #include <vector>
