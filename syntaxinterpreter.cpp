@@ -47,10 +47,15 @@ public:
 		case TOKENTYPE_NEG:
 			return 50;
 
-		case TOKENTYPE_LP:
+		case TOKENTYPE_FAC:
 			return 60;
+
+		case TOKENTYPE_LP:
+			return 70;
 		
 		default:
+			std::cout << "Unknown internal error" << std::endl;
+			std::cout << "Exiting..." << std::endl;
 			assert(0);
 		}
 	}
@@ -69,7 +74,7 @@ void top_calculate(ExpresParser& ep) {
 		//if we have less than two values and an operator, then there
 		//is a missing value. but the exception to this is the negative sign,
 		//as it only has an effect on one number
-		if (ep.operator_s.peek().type != TOKENTYPE_NEG) {
+		if (ep.operator_s.peek().type != TOKENTYPE_NEG && ep.operator_s.peek().type != TOKENTYPE_FAC) {
 			std::cout << "Error: missing value, stack size " << ep.value_s.size() << std::endl;
 			throw string("");
 		}
@@ -84,6 +89,17 @@ void top_calculate(ExpresParser& ep) {
 		Token v = ep.value_s.pop();
 		v.set_number(0, v.value_d * -1);
 		ep.value_s.push(v);	
+		return;
+	}
+
+	if (op.type == TOKENTYPE_FAC) {
+		Token v = ep.value_s.pop();
+		int res = 1;
+		for (int i = 2; i <= v.value_d; i++) {
+			res *= i;
+		}
+		v.set_number(0, res);
+		ep.value_s.push(v);
 		return;
 	}
 
@@ -209,7 +225,10 @@ void print_usage(bool init, bool more) {
 	if (!more) {
 		if (init) {
 			printf("\n");
-			printf("CLC (Command Line Calculator) Version 21.2.2 (stable)\n\n");
+			printf("CLC (Command Line Calculator) Version 21.2.4 (stable)\n\n");
+
+			printf(debug ? "Debug mode on \n\n" : "");
+
 			printf("Small tips: ");
 			printf("CLC currently does not support root operations, please use fraction exponential forms as substitutes.\n");
 			printf("This issue will be fixed as soon as possible on the next major update to support functions. Sorry for the inconvinience.\n\n");

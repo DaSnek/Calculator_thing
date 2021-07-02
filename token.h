@@ -13,6 +13,7 @@ enum {
 	TOKENTYPE_DIV,
 	TOKENTYPE_POW,
 	TOKENTYPE_NEG,
+	TOKENTYPE_FAC, //
 	TOKENTYPE_EL,
 	TOKENTYPE_RP,
 	TOKENTYPE_LP,
@@ -78,6 +79,12 @@ struct Token {
 		offset = off;
 	}
 
+	void set_fac(int off) {  //
+		type = TOKENTYPE_FAC;
+		value_s = "!";
+		offset = off;
+	}
+
 	void set_number(int off, double n) {
 		type = TOKENTYPE_NUM;
 		offset = off;
@@ -95,7 +102,7 @@ struct Token {
 		value_s = ")";
 		offset = off;
 	}
-	
+
 	~Token() {}
 };
 

@@ -59,6 +59,10 @@ string Token::to_string() const {
 		ss << "<^>";
 		break;
 
+	case TOKENTYPE_FAC:  //
+		ss << "<!>";
+		break;
+
 	case TOKENTYPE_NONE:
 		ss << "<NONE>";
 		break;
@@ -114,17 +118,17 @@ Token TokenParser::get_token() {
 		cur_offset++;
 
 	//assigns types to values accordingly
-	if (src[cur_offset] ==  '+')  {
+	if (src[cur_offset] == '+')  {
 		token.set_plus(cur_offset);
 		cur_offset++;
 		prev_token = token;
 		return token;
 	}	
 	
-	if (src[cur_offset] ==  '-')  {
-		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP) {
+	if (src[cur_offset] == '-')  {
+		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP || prev_token.type == TOKENTYPE_FAC) {
 			token.set_minus(cur_offset);	//special case for the '-' operator.
-			cur_offset++;					//if the token in front of it is a number or a rp 
+			cur_offset++;					//if the token in front of it is a number or a rp or a factorial,
 			prev_token = token;				//then its a operator -, otherwise its a negative sign				
 			return token;					
 		} else {
@@ -136,14 +140,14 @@ Token TokenParser::get_token() {
 		}
 	}	
 	
-	if (src[cur_offset] ==  '*')  {
+	if (src[cur_offset] == '*')  {
 		token.set_mul(cur_offset);
 		cur_offset++;
 		prev_token = token;
 		return token;
 	}	
 	
-	if (src[cur_offset] ==  '/')  {
+	if (src[cur_offset] == '/')  {
 		token.set_div(cur_offset);
 		cur_offset++;
 		prev_token = token;
@@ -166,6 +170,13 @@ Token TokenParser::get_token() {
 
 	if (src[cur_offset] == '^') {
 		token.set_pow(cur_offset);
+		cur_offset++;
+		prev_token = token;
+		return token;
+	}
+
+	if (src[cur_offset] == '!') {     //
+		token.set_fac(cur_offset);
 		cur_offset++;
 		prev_token = token;
 		return token;
