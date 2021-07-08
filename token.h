@@ -13,10 +13,13 @@ enum {
 	TOKENTYPE_DIV,
 	TOKENTYPE_POW,
 	TOKENTYPE_NEG,
-	TOKENTYPE_FAC, //
+	TOKENTYPE_FAC, 
 	TOKENTYPE_EL,
 	TOKENTYPE_RP,
 	TOKENTYPE_LP,
+	TOKENTYPE_VAR, //
+//	TOKENTYPE_NEWVAR,
+	TOKENTYPE_EQS, //
 };
 
 struct Token {
@@ -79,7 +82,7 @@ struct Token {
 		offset = off;
 	}
 
-	void set_fac(int off) {  //
+	void set_fac(int off) {  
 		type = TOKENTYPE_FAC;
 		value_s = "!";
 		offset = off;
@@ -100,6 +103,18 @@ struct Token {
 	void set_rp(int off) {
 		type = TOKENTYPE_RP;
 		value_s = ")";
+		offset = off;
+	}
+
+	void set_eqs(int off) {  //
+		type = TOKENTYPE_EQS;
+		value_s = "=";
+		offset = off;
+	}
+
+	void set_var(int off, std::string name) {  //
+		type = TOKENTYPE_VAR;
+		value_s = name;
 		offset = off;
 	}
 

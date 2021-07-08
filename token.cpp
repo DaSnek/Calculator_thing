@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 #include "token.h"
 
@@ -9,6 +10,7 @@ using std::string;
 
 extern bool debug;
 extern double prev_result;
+extern std::map<std::string, double> vars;
 
 static bool is_digit(char c) {
 	return c <= '9' && c >= '0';
@@ -16,6 +18,10 @@ static bool is_digit(char c) {
 
 static bool is_letter(char c) {
 	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c >- 'z');
+}
+
+static bool is_space(char c) {
+	return c == ' ' || c == '\t' || c == '\n';
 }
 
 //aids in printing and debugging
@@ -59,8 +65,12 @@ string Token::to_string() const {
 		ss << "<^>";
 		break;
 
-	case TOKENTYPE_FAC:  //
+	case TOKENTYPE_FAC: 
 		ss << "<!>";
+		break;
+
+	case TOKENTYPE_EQS: //
+		ss << "<=>";
 		break;
 
 	case TOKENTYPE_NONE:
@@ -69,6 +79,10 @@ string Token::to_string() const {
 
 	case TOKENTYPE_NUM:
 		ss << "<NUMBER: " << value_d << ">";
+		break;
+
+	case TOKENTYPE_VAR:
+		ss << "<VAR: " << value_s << ">";
 		break;
 
 	default:
@@ -92,10 +106,6 @@ void TokenParser::print_error(const string& msg) const {
 		printf(" ");
 	}
 	printf("^\n");
-}
-
-static bool is_space(char c) {
-	return c == ' ' || c == '\t' || c == '\n';
 }
 
 //cuts the string input by the user into individual "tokens"
@@ -126,10 +136,12 @@ Token TokenParser::get_token() {
 	}	
 	
 	if (src[cur_offset] == '-')  {
-		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP || prev_token.type == TOKENTYPE_FAC) {
+		if (prev_token.type == TOKENTYPE_NUM || prev_token.type == TOKENTYPE_RP ||
+				 prev_token.type == TOKENTYPE_FAC || prev_token.type == TOKENTYPE_VAR) {
 			token.set_minus(cur_offset);	//special case for the '-' operator.
 			cur_offset++;					//if the token in front of it is a number or a rp or a factorial,
 			prev_token = token;				//then its a operator -, otherwise its a negative sign				
+
 			return token;					
 		} else {
 			token.set_neg(cur_offset);
@@ -175,12 +187,20 @@ Token TokenParser::get_token() {
 		return token;
 	}
 
-	if (src[cur_offset] == '!') {     //
+	if (src[cur_offset] == '!') {
 		token.set_fac(cur_offset);
 		cur_offset++;
 		prev_token = token;
 		return token;
 	}
+
+	if (src[cur_offset] == '=') {     //
+		token.set_eqs(cur_offset);
+		cur_offset++;
+		prev_token = token;
+		return token;
+	}
+
 
 	// if we encounter a $ sign, then we set its type as a number and 
 	//assigns the previous result to it
@@ -188,6 +208,38 @@ Token TokenParser::get_token() {
 		token.set_number(cur_offset, prev_result);
 		cur_offset++;
 		prev_token = token;
+		return token;
+	}
+
+	//if we encounter a letter...
+	if (is_letter(src[cur_offset])) {
+		int end = cur_offset + 1;
+		
+		while (end < src.size() && (is_letter(src[end]) || src[end] == '_')) {
+			end++;
+		}
+
+		int loc = 0;
+		string s = src.substr(cur_offset, end - cur_offset);
+
+//		if (loc != s.size()) {
+//			print_error("invalid function/value name");
+//			exit(-1);
+//		} 
+		
+		if (s == "e") {
+			token.set_number(cur_offset, 2.71828);
+		} else if (s == "pi" || s == "PI" || s == "Pi") {
+			token.set_number(cur_offset, 3.14159265);
+		} else /* if (var.find(s) != vars.end()) */ {
+			token.set_var(cur_offset, s);
+		}// else {
+		//	token.set_newvar(cur_offset, s);
+//		}
+
+		cur_offset = end;
+		prev_token = token;
+
 		return token;
 	}
 
