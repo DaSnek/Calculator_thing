@@ -310,7 +310,7 @@ void print_usage(bool init, bool more) {
 	if (!more) {
 		if (init) {
 			printf("\n");
-			printf("CLC (Command Line Calculator) Version 21.3.1 (stable)\n\n");
+			printf("CLC (Command Line Calculator) Version 21.3.2 (stable)\n\n");
 
 			printf(debug ? "Debug mode on \n\n" : "");
 

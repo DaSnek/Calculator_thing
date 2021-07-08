@@ -212,7 +212,7 @@ Token TokenParser::get_token() {
 	}
 
 	//if we encounter a letter...
-	if (is_letter(src[cur_offset])) {
+	if (is_letter(src[cur_offset]) || src[cur_offset] == '_') {
 		int end = cur_offset + 1;
 		
 		while (end < src.size() && (is_letter(src[end]) || src[end] == '_')) {
